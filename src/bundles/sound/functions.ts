@@ -18,7 +18,8 @@ import type {
   Sound,
   SoundProducer,
   SoundTransformer,
-  AudioPlayed
+  AudioPlayed,
+  ShownArray  // temp
 } from './types';
 
 // Importing the FFT library
@@ -28,8 +29,10 @@ const FS: number = 44100; // Output sample rate
 const fourier_expansion_level: number = 5; // fourier expansion level
 
 const audioPlayed: AudioPlayed[] = [];
+const shownArrays: ShownArray[] = [];
 context.moduleContexts.sound.state = {
-  audioPlayed
+  audioPlayed,
+  shownArrays
 };
 
 // Singular audio context for all playback functions
@@ -385,6 +388,23 @@ export function play_in_tab(sound: Sound): Sound {
 }
 
 /**
+ * Show the input array in a tab. The array is added to an array of arrays
+ * to be displayed.
+ * 
+ * @param arr The array to display.
+ * @returns The number of arrays to display, including the input array.
+ */
+function show_array(name : String, array: any[]): number {
+  const arrayCopy = array.map(x => x);
+  const shownArray : ShownArray = {
+    msg: name,
+    arr: arrayCopy
+  };
+  shownArrays.push(shownArray);
+  return shownArrays.length;
+}
+
+/**
  * Returns the smallest power of 2,
  * that is greater than or equal to a given number.
  *
@@ -411,6 +431,7 @@ function modifyFFT(samples: Array<number>): Array<number> {
 
   console.log(`[DEBUG] samples.length = ${n}`);
   console.log(`[DEBUG] samples = ${samples}`);
+  show_array("samples", samples);
 
   const fft = new FFT(n);
   const frequencyDomain = fft.createComplexArray();
@@ -420,6 +441,7 @@ function modifyFFT(samples: Array<number>): Array<number> {
   fft.toComplexArray(samples, fullSamples);
   fft.transform(frequencyDomain, fullSamples);
   console.log(`[DEBUG] frequencyDomain = ${frequencyDomain}`);
+  show_array("frequencyDomain", frequencyDomain);
 
   // Transformation step
 
@@ -435,6 +457,7 @@ function modifyFFT(samples: Array<number>): Array<number> {
   }
 
   console.log(`[DEBUG] *modified* frequencyDomain = ${frequencyDomain}`);
+  show_array("*modified* frequencyDomain", frequencyDomain);
 
   // Calculate magnitude
   const magnitudes = new Array<number>;
@@ -445,16 +468,19 @@ function modifyFFT(samples: Array<number>): Array<number> {
   }
 
   console.log(`[DEBUG] magnitudes = ${magnitudes}`);
+  show_array("magnitudes", magnitudes);
 
   fft.inverseTransform(invertedSamples, frequencyDomain);
 
   console.log(`[DEBUG] invertedSamples.length = ${invertedSamples.length}`);
   console.log(`[DEBUG] invertedSamples = ${invertedSamples}`);
+  show_array("invertedSamples", invertedSamples);
 
   const finalSamples = new Array<number>(samples.length);
   fft.fromComplexArray(invertedSamples, finalSamples);
 
   console.log(`[DEBUG] finalSamples = ${finalSamples}`);
+  show_array("finalSamples", finalSamples);
 
   return finalSamples;
 }
