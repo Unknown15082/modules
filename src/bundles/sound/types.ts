@@ -13,6 +13,11 @@ export type AudioPlayed = {
   dataUri: string;
 };
 
+export type ShownArray = {  // temp
+  msg: String,
+  arr: any[]
+}
 export type SoundModuleState = {
-  audioPlayed: AudioPlayed[]
+  audioPlayed: AudioPlayed[],
+  shownArrays: ShownArray[]  // temp
 };
